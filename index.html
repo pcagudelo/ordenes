@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+      <!--Import Google Icon Font-->
+      <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+      <!--Import materialize.css-->
+      <link type="text/css" rel="stylesheet" href="css/materialize.min.css"  media="screen,projection"/>
+      <link rel="stylesheet" href="./css/tema.css">
+       <!--Import jQuery before materialize.js-->
+      <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+      <script type="text/javascript" src="js/materialize.min.js"></script>
+      <script type="text/javascript" src="js/uploadIda.js"></script>
+      <!--Let browser know website is optimized for mobile-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+<body >
+
+
+<div class="row">
+
+
+    <div class="col s1 m4 l4">
+    </div>
+
+<div class="col s10 m4 l4">
+
+
+
+<h5 class="center blue-text"> Inicio de Sesion</h5>
+<div class="card">
+   
+    <div class="card-content">
+        <span class="card-title blue-text center bold">
+          
+        </span>
+
+        <form id="form-login"> 
+            <div class="row">
+                <div class="input-field">
+                    <i class="material-icons prefix">account_circle</i>
+                    <input id="usuario" type="text" class="validate" required>
+                </div>
+            </div>
+            <div class="row">
+                <div class="input-field">
+                    <i class="material-icons prefix">fingerprint</i>
+                    <input id="clave" type="password" class="validate" required>
+                </div>
+            </div>
+            <div class="row">
+                
+                    <a class="waves-effect waves-light btn btn-large blue col s12 disabled" id="login">LOGIN</a>
+                
+            </div>
+        </form>
+
+
+    </div>
+
+</div>
+</div>
+<div class="col s1 m4 l4"> </div>
+
+</div>
+<script>
+    $(document).ready(()=>{
+
+        var classActive="waves-effect waves-light btn btn-large blue col s12";
+        var classInactive="waves-effect waves-light btn btn-large blue col s12 disabled";
+        var clave,user;
+
+        $("form").on("change","input",()=>{
+        clave= $("#clave").val();
+        user=$("#usuario").val();
+
+        if(clave!="" && usuario!=""){
+
+            $("#login").removeAttr("class");
+            $("#login").addClass(classActive)
+
+
+        }
+
+
+        });
+      
+       $("#login").click(()=>{
+
+        $.post("./backend/login.php",{usuario:user,clave:clave},(response)=>{
+
+            if(response=="true"){
+
+                location.href ="./principal.php";
+
+
+            }
+
+            else if(response=="false"){
+
+                Materialize.toast('Error al inciar Sesion :|', 4000)
+                document.getElementById("form-login").reset();
+            }
+            else console.log(response);
+        });
+
+       });
+
+
+    });
+
+</script>
+</body>
+</html>

@@ -1,0 +1,232 @@
+<div class="row">
+    <div class="col s12">
+        <ul class="tabs white">
+            <li class="tab col s3"><a class="blue-text" href="#test1">Programacion</a></li>
+            <li class="tab col s3"><a class="blue-text" href="#terreno">En Terreno</a></li>
+
+        </ul>
+    </div>
+
+     <!-- RESUMEN ORDENES ENVIADAS A TERRENO-->
+    <div id="test1" class="col s12">
+
+            <table class="highlight bordered responsive-table">
+                    <thead>
+                        <tr>
+                            <th>Zona</th>
+                            <th>Fecha Terrreno</th>
+                            <th>Tecnico</th>
+                            <th>Cantidad</th>
+                            <th>Valor</th>
+                          
+                        </tr>
+                    </thead>
+        
+                    <tbody id="resumTerreno">
+        
+                    </tbody>
+                </table>
+            </div>
+
+
+    </div>
+
+    <!-- ORDENES EN TRATAMIENTO CON RELACION TECNICO TPO-->
+    <div id="terreno" class="col s12">
+
+        <table class="highlight bordered responsive-table">
+            <thead>
+                <tr>
+                    <th>Zona</th>
+                    <th>Tratamiento</th>
+                    <th>Orden</th>
+                    <th>Municipio</th>
+                    <th>Localidad</th>
+                    <th>Tecnico</th>
+                    <th style='text-align:center'>Antiguedad</th>
+                </tr>
+            </thead>
+
+            <tbody id="tbTerreno">
+
+            </tbody>
+        </table>
+    </div>
+
+     <!-- FIN ORDENES EN TRATAMIENTO CON RELACION TECNICO TPO-->
+  
+</div>
+
+<div id="modal1" class="modal">
+    <div class="modal-content">
+        <h4>Gestionar Orden </h4>
+        
+        <div id="anotaciones">
+                <h5>Anotaciones</h5>
+                <div id="list-anotaciones">
+
+                </div>
+
+                <div id="new-nota">
+
+
+                    <div class="row">
+
+                        <form name="form-notas" id="form-notas">
+                            <div class="input-field col s8">
+                                    <input id="text-nota" type="text" class="validate" id="text-nota">
+                                    <label for="text-nota">Nueva Nota</label>
+                            </div>
+                            <div class="input-field col s4">
+                                    <a class="btn-floating btn-large blue" id="addNota" data-id="">
+                                    <i class="material-icons">save</i></a>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+
+
+        </div>
+            
+       
+
+        <a class="btn-floating btn-large red" id="cerrar_telefono" data-id="">
+            <i class="material-icons">perm_phone_msg</i>
+        </a><p>Confirmar Ejecucion via Telefono</p>
+        
+        <a class="btn-floating btn-large yellow" id="depurar" data-id="">
+            <i class="material-icons">laptop_mac</i></a>
+        </a><p>Depurar por Centro Tecnico</p>
+        
+
+    </div>
+    <div class="modal-footer">
+        <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">Aceptar</a>
+    </div>
+</div>
+
+<script>
+    $('ul.tabs').tabs();
+    
+    $('.modal').modal({
+      dismissible: true, // Modal can be dismissed by clicking outside of the modal
+      opacity: .5, // Opacity of modal background
+      inDuration: 300, // Transition in duration
+      outDuration: 200, // Transition out duration
+      startingTop: '4%', // Starting top style attribute
+      endingTop: '10%', // Ending top style attribute
+      ready: function(modal, trigger) { // Callback for Modal open. Modal and trigger parameters available.
+        
+      },
+      complete: function() { 
+
+ 
+
+
+       } // Callback for Modal close
+    }
+  );
+  $("#tbTerreno").on("click","td",(event)=>{
+
+    if(event.target.attributes[0].value)
+    {
+        $('.modal').modal('open');
+
+        let orden=event.target.attributes[0].value;
+
+        document.getElementById("cerrar_telefono").setAttribute("data-id",orden);
+        document.getElementById("depurar").setAttribute("data-id",orden);
+        document.getElementById("addNota").setAttribute("data-id",orden);
+
+  
+    }
+
+  })
+
+  $("#addNota").on("click",()=>{
+
+    let os=$("#addNota").attr("data-id");
+    let nota=$("#text-nota").val();
+    console.log("Guardara la nota:"+ nota+" en la OS"+ os);
+    
+    $.post("./backend/updateSQL.php",{os:os,nota:nota},(response)=>{
+
+        if(response=="true"){
+
+            console.log("Nota Guardada Correctamente");
+
+        }
+        else{
+
+            console.log("Error al guardar la nota\n");
+
+        }
+    });
+
+  });
+  $("#cerrar_telefono").click(()=>{
+
+    let os=$("#cerrar_telefono").attr("data-id");
+
+   $.post("./backend/updateOs.php",{os:os},(reques)=>{
+
+    if(reques=="update"){
+
+        console.log("OS Actualizada correctamente");
+        $('.modal').modal('close');
+    }
+    else {
+
+        console.log("Error al actualizar la orden");
+        $('.modal').modal('close');
+
+
+
+    }
+   }); 
+  });
+ 
+    //$("#depurar").attr("data-id",orden);
+   
+
+
+    $.getJSON("./backend/getOsTerreno.php", (ordenes) => {
+
+        ordenes.forEach((element) => {
+            let line =
+                "<tr>" +
+                "<td>" + element['zona'] + "</td>" +
+                "<td>" + element['fecha_tratamiento'] + "</td>" +
+                "<td data-id='"+ element['num_os'] +"'>" + element['num_os'] + "</td>" +
+                "<td>" + element['municipio'] + "</td>" +
+                "<td>" + element['cabe_correg'] + "</td>" +
+                "<td>" + element['nombre_tecnico'] + "</td>" +
+                "<td style='text-align:center'>" + element['antiguedad'] + "</td>" +
+                "</tr>"
+
+                ;
+            $("#tbTerreno").append(line);
+        });
+
+    });
+
+
+    $.getJSON("./backend/getResumTerreno.php", (ordenes) => {
+
+        ordenes.forEach((element) => {
+            let line =
+                "<tr>" +
+                "<td>" + element['zona'] + "</td>" +
+                "<td>" + element['FechaSalidaTerreno'] + "</td>" +
+                "<td>" + element['nombre_tecnico'] + "</td>" +
+                "<td>" + element['cantidad'] + "</td>" +
+                "<td>" + element['Valor'] + "</td>" +
+                "</tr>"
+
+                ;
+            $("#resumTerreno").append(line);
+        });
+
+    });
+</script>

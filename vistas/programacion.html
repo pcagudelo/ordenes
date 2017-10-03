@@ -1,0 +1,280 @@
+
+  <ul class="collapsible" data-collapsible="accordion">
+    <li>
+      <div class="collapsible-header"><i class="material-icons">attach_file</i>Archivo Ida</div>
+      <div class="collapsible-body"><span>Este Archivo contiene las ordenes cargadas en TPO.</span>
+       
+       
+        <!--FORMULARIO DE CARGA ARCHIVO IDA-->
+        <form method="post" action="./upload.php" enctype="multipart/form-data" id="sendFile">
+            <div class="file-field input-field col s10">
+                <div class="btn blue">
+                    <span>Ida</span>
+                    <input type="file" name="arch_ida" id="arch_ida" accept="text/plain">
+                </div>
+                <div class="file-path-wrapper">
+                    <input class="file-path validate" type="text">
+                </div>
+  
+                       
+            
+            </div>
+
+            <div clas="col s2"> 
+                    <!--BOTON DE ENVIO ARCHIVO -->
+                    <a class="waves-effect waves-light btn-floating btn-large blue right" id="publish"><i class="material-icons">publish</i></a>
+                    
+    
+                </div>
+            
+            
+      </form>
+        <!--FORMULARIO DE CARGA ARCHIVO IDA-->
+    
+    
+    </div>
+    </li>
+    <li>
+      <div class="collapsible-header"><i class="material-icons">phone_android</i>Asignacion TP</div>
+      <div class="collapsible-body">
+        <div clas="row">
+
+        <div class="input-field">
+        <select id="tecnico">
+        </select>
+        <label>Selecionar tecnico</label>
+        </div>
+
+        <div class="input-field">
+        <select id="tpoSelect">              
+        </select>
+        <label>Seleccionar TPO</label>
+        </div>
+
+        <a id="btnAsignacion" class="waves-effect waves-light btn blue col s12">
+        <i class=" material-icons">assignment_ind</i>
+        </a>
+
+        </div>
+
+      </div>
+    </li>
+    <li>
+      <div class="collapsible-header"><i class="material-icons">person_pin</i>Relacion TP Tecnico</div>
+      <div class="collapsible-body">
+            <div id="tecSelcionados">
+            </div>
+                <a class="waves-effect waves-light btn blue" id="enviarAsignacion" href="#">
+                    <i class="material-icons">save</i>
+                </a>
+      </div>
+    </li>
+
+    <li>
+            <div class="collapsible-header"><i class="material-icons">attach_file</i>Archivo Vuelta VT</div>
+            <div class="collapsible-body"><span>Este Archivo contiene las Actividades de la OS.</span>
+             
+             
+              <!--FORMULARIO DE CARGA ARCHIVO VUELTA VT-->
+              <form id="form-vt">
+                  <div class="file-field input-field col s10">
+                      <div class="btn blue">
+                          <span>VT</span>
+                          <input type="file" name="arch_ida" id="file-vt" accept="text/plain">
+                      </div>
+                      <div class="file-path-wrapper">
+                          <input class="file-path validate" type="text">
+                      </div>
+                   </div>
+      
+                  <div clas="col s2"> 
+                          <!--BOTON DE ENVIO ARCHIVO -->
+                          <a class="waves-effect waves-light btn-floating btn-large blue right" id="publish-vt"><i class="material-icons">publish</i></a>
+                  </div>   
+              </form>
+              <!--FORMULARIO DE CARGA ARCHIVO VUELTA VT-->
+          
+          
+          </div>
+          </li>
+  </ul>
+
+
+
+
+
+
+
+<script>
+    //INICIALIZADORES
+ 
+    $('.collapsible').collapsible();
+    $('#publish').hide()
+
+  
+
+
+    //CARGAR ARCHIVO IDA
+    $("#publish").click(sendFile);
+
+    var archida= document.getElementById("arch_ida");
+    archida.addEventListener("change", getFile, false);
+
+
+    function getFile(event) {
+
+        //OCULTAR Y MOSTRAR BOTON SI SE ESCOGE UN ARCHIVO
+        if(archida.value){
+         $('#publish').show();
+        }
+
+        else $('#publish').hide();
+
+        let file = event.target.files[0];
+        //console.log(file);
+        return file;
+
+    }
+    function sendFile() {
+              
+        
+        let file = document.getElementById("arch_ida").files[0];
+        let data = new FormData($("form")[0]);
+        let url = 'upload.php';
+        $.ajax({
+            url: url,
+            type: 'POST',
+            contentType: false,
+            data: data,
+            processData: false,
+            cache: false
+        }).done(
+            (msg) => {
+                if (msg == "enviado") {
+
+                    Materialize.toast('Archivo Procesado con Exito', 4000)
+                  
+                } else {
+           
+                    Materialize.toast('Error Al Subir y procesar el Archivo', 4000)
+                  
+                }
+                document.getElementById("sendFile").reset();
+            }
+            );
+
+    }
+    
+    //FIN INICIO CARGA ARCHIVOS
+    //select tecnico y tpo
+    $('select').material_select();
+    
+    var select_tecnico = [];
+    var select_tpo = [];
+    var asignacionTpo = [];
+    //SELECT TECNICO
+
+    $.getJSON("./backend/getTecnico.php", (datos) => {
+        datos.forEach((item, indice, array) => {
+            select_tecnico.push({ codigo_tecnico: item["codigo_tecnico"], nombre_tecnico: item["nombre_tecnico"] });
+        });
+
+        tecnicos(datos);
+    });
+
+
+
+    function tecnicos(select_tecnico) {
+        select_tecnico.forEach((item, indice, array) => {
+
+            let opt = "<option id-index=" + indice +
+                " value='" + item["codigo_tecnico"] + "'>" +
+                item["nombre_tecnico"] + "</option>";
+            $("#tecnico").append(opt);
+            $('select').material_select();
+        });
+    }
+    //FiN SELECT TECNICO
+    //SELECT TPO
+    $.getJSON("./backend/getData.php", (datos) => {
+        datos.forEach((item, indice, array) => {
+            select_tpo.push({ serial_tpo: item["serial_tpo"], fecha_tratamiento: item["fecha_tratamiento"] })
+        });
+        tpoSelect(datos);
+    });
+
+    function tpoSelect(select_tpo) {
+        select_tpo.forEach((item, indice, array) => {
+
+            let opt = "<option id-fecha=" + item["fecha_tratamiento"] + " id-index=" + indice + " value='" + item["serial_tpo"] + "'>" + item["serial_tpo"] + "-" + item["fecha_tratamiento"] + "</option>";
+
+            $("#tpoSelect").append(opt);
+            $('select').material_select();
+        });
+    }
+    //FIN SELECT TPO
+    // ASIGNACION TPO A TECNICO
+
+    $("#enviarAsignacion").hide();
+
+    $("#btnAsignacion").click(() => {
+
+        $("#enviarAsignacion").show();
+        let index_tecnico = $("#tecnico option:selected").attr("id-index");
+        let cod_tecnico = $("#tecnico option:selected").val();
+        let nom_tecnico = $("#tecnico option:selected").text();
+        let index_tpo = $("#tpoSelect option:selected").attr("id-index");
+        let fecha_tpo = $("#tpoSelect option:selected").attr("id-fecha");
+        let cod_tpo = $("#tpoSelect option:selected").val();
+
+        $("#tecnico").html("");
+        select_tecnico.splice(index_tecnico, 1);
+        tecnicos(select_tecnico);
+
+
+        $("#tpoSelect").html("");
+        select_tpo.splice(index_tpo, 1);
+        tpoSelect(select_tpo);
+
+        asignacionTpo.push({ serie_tpo: cod_tpo, cod_tecnico: cod_tecnico, nom_tecnico: nom_tecnico, fecha_asig: fecha_tpo });
+        $("#tecSelcionados").html("");
+
+        asignacionTpo.forEach((item, indice, array) => {
+
+            //let seleccionado = "<li class='collection-item'>Nombre: " + item["nom_tecnico"] + " TPO:" + item["serie_tpo"] + "</li>";
+            let seleccion="<div class='chip'><i class='close material-icons'>assignment_ind</i>Tecnico: "+ item["nom_tecnico"] +" Asociado a TPO: "+ item["serie_tpo"]+"<div>"
+            $("#tecSelcionados").append(seleccion);
+
+        });
+        console.log(select_tecnico.length);
+        if (select_tecnico.length <= 0 || select_tpo.length <= 0) {
+            $("#btnAsignacion").hide();
+
+        };
+
+    });
+    // FIN ASIGNACION TPO A TECNICO
+
+    //ENVIO ARRAY ASIGNACION TECNICOS
+
+    $("#enviarAsignacion").click(() => {
+
+        $.post("./backend/saveAsignacion.php", { relacionAsignacion: asignacionTpo }, (datos) => {
+
+        if(datos=="save"){
+
+            Materialize.toast('Asignacion Exitosa', 4000);
+            $("#tecSelcionados").html("");
+            asignacionTpo=[];
+            $("#enviarAsignacion").hide();
+        }
+        else     {Materialize.toast('Ha ocurrido un error', 4000)
+        console.log(datos);
+        };
+
+        });
+
+
+    });
+
+</script>
